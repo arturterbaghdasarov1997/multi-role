@@ -1,0 +1,120 @@
+import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import { Box, Typography, Avatar, Button } from '@mui/material';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import Navbar from '../components/NavBar';
+import { WorkingDay } from '../interfaces/form-values.interface';
+
+const ProfilePage: React.FC = () => {
+  const location = useLocation();
+  
+  console.log("ProfilePage location.state:", location.state);
+
+  const {
+    firstName,
+    lastName,
+    pid,
+    phoneNumber,
+    email,
+    profileImage,
+    role,
+    location: userLocation,
+    vehicle,
+    workingDays,
+  } = location.state || {};
+
+  const [image, setImage] = useState<string | ArrayBuffer | null>(null);
+
+  useEffect(() => {
+    const savedImage = localStorage.getItem('profileImage');
+    if (savedImage) {
+      setImage(savedImage);
+    } else if (profileImage) {
+      setImage(profileImage);
+    }
+  }, [profileImage]);
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImage(reader.result);
+        localStorage.setItem('profileImage', reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleAddWorkingDay = () => {
+    if (workingDays.length < 7) {
+        workingDays([
+            ...workingDays, 
+            { index: workingDays.length, day: 'Monday', startHours: '08:00', endHours: '17:00' }
+        ]);
+    }
+};
+
+  return (
+    <Box>
+      <Navbar role={role} />
+      <Box 
+        sx={{ 
+          padding: 2,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
+      >
+        <Avatar
+          src={image ? (image as string) : 'path/to/default/image.png'}
+          alt="Profile Image"
+          sx={{ width: 200, height: 200 }}
+        />
+        <Button
+            component="label"
+            role={undefined}
+            variant="contained"
+            tabIndex={-1}
+            startIcon={<CloudUploadIcon />}
+            sx={{ mt: 2 }}
+        >
+          Upload Image
+          <input type="file" accept="image/*" hidden onChange={handleFileChange} />
+        </Button>
+        <Typography variant="h6" sx={{ mt: 2 }}>Name: {`${firstName || ''} ${lastName || ''}`}</Typography>
+        <Typography variant="body1">PID: {pid || 'Not provided'}</Typography>
+        <Typography variant="body1">Phone Number: {phoneNumber || 'Not provided'}</Typography>
+        <Typography variant="body1">Email: {email || 'Not provided'}</Typography>
+
+        {role === 'user' && userLocation && (
+          <>
+            <Typography variant="h6" sx={{ mt: 2 }}>Address:</Typography>
+            <Typography variant="body1">Longitude: {userLocation.lng}</Typography>
+            <Typography variant="body1">Latitude: {userLocation.lat}</Typography>
+          </>
+        )}
+
+        {role === 'courier' && workingDays && (
+          <>
+            <Typography variant="h6" sx={{ mt: 2 }}>Vehicle: {vehicle || 'Not provided'}</Typography>
+            <Typography variant="h6" sx={{ mt: 2 }}>Working Days:</Typography>
+            {workingDays.length > 0 ? (
+                workingDays.map(({ index, day, startHours, endHours }: WorkingDay) => (
+                    <Box key={index}>
+                        <Typography variant="body1">
+                            {day}: {startHours} - {endHours}
+                        </Typography>
+                    </Box>
+                ))
+            ) : (
+                <Typography variant="body1">No working days available.</Typography>
+            )}
+          </>
+        )}
+      </Box>
+    </Box>
+  );
+};
+
+export default ProfilePage;
