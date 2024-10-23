@@ -46,15 +46,6 @@ const ProfilePage: React.FC = () => {
     }
   };
 
-  const handleAddWorkingDay = () => {
-    if (workingDays.length < 7) {
-        workingDays([
-            ...workingDays, 
-            { index: workingDays.length, day: 'Monday', startHours: '08:00', endHours: '17:00' }
-        ]);
-    }
-};
-
   return (
     <Box>
       <Navbar role={role} />

@@ -66,13 +66,14 @@ const DynamicForm = ({ role }: { role: 'admin' | 'user' | 'courier' }) => {
         state: {
           firstName: data.firstName,
           lastName: data.lastName,
+          pid: data.pid,
           email: data.email,
           phoneNumber: data.phoneNumber,
           role,
           location: data.address,
           profileImage: data.profileImage ? data.profileImage[0] : null,
           vehicle: data.vehicle,
-          workingDays: workingDays,
+          workingDays: data.workingDays,
         },
       });
     } catch (error) {
