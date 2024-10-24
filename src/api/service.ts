@@ -25,7 +25,6 @@ export const createUser = async (userData: object) => {
   }
 };
 
-
 // POST request to create an admin
 export const createAdmin = async (adminData: object) => {
   try {

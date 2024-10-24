@@ -46,15 +46,6 @@ const ProfilePage: React.FC = () => {
     }
   };
 
-  const handleAddWorkingDay = () => {
-    if (workingDays.length < 7) {
-        workingDays([
-            ...workingDays, 
-            { index: workingDays.length, day: 'Monday', startHours: '08:00', endHours: '17:00' }
-        ]);
-    }
-};
-
   return (
     <Box>
       <Navbar role={role} />
@@ -82,7 +73,7 @@ const ProfilePage: React.FC = () => {
           Upload Image
           <input type="file" accept="image/*" hidden onChange={handleFileChange} />
         </Button>
-        <Typography variant="h6" sx={{ mt: 2 }}>Name: {`${firstName || ''} ${lastName || ''}`}</Typography>
+        <Typography variant="h3" sx={{ mt: 2 }}>{`${firstName || ''} ${lastName || ''}`}</Typography>
         <Typography variant="body1">PID: {pid || 'Not provided'}</Typography>
         <Typography variant="body1">Phone Number: {phoneNumber || 'Not provided'}</Typography>
         <Typography variant="body1">Email: {email || 'Not provided'}</Typography>
@@ -90,8 +81,8 @@ const ProfilePage: React.FC = () => {
         {role === 'user' && userLocation && (
           <>
             <Typography variant="h6" sx={{ mt: 2 }}>Address:</Typography>
-            <Typography variant="body1">Longitude: {userLocation.lng}</Typography>
-            <Typography variant="body1">Latitude: {userLocation.lat}</Typography>
+            <Typography variant="h6">City: {userLocation.city}</Typography>
+            <Typography variant="h6">Street: {userLocation.street}</Typography>
           </>
         )}
 

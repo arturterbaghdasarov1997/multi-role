@@ -1,20 +1,89 @@
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useState } from 'react';
-import { TextField, Button, Select, MenuItem, Box, Typography, FormControl, InputLabel } from '@mui/material';
+import {
+  TextField,
+  Button,
+  Select,
+  MenuItem,
+  Box,
+  Typography,
+  FormControl,
+  InputLabel,
+  InputAdornment,
+  IconButton
+} from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import LoginIcon from '@mui/icons-material/Login';
 import AddIcon from '@mui/icons-material/Add';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { createUser, createAdmin, createCourier } from '../api/service';
 import { FormValues, WorkingDay } from '../interfaces/form-values.interface';
 
 const DynamicForm = ({ role }: { role: 'admin' | 'user' | 'courier' }) => {
-  const { register, handleSubmit } = useForm<FormValues>();
+  const { register, handleSubmit, setValue } = useForm<FormValues>();
   const [workingDays, setWorkingDays] = useState<WorkingDay[]>([
     { index: 0, day: '', startHours: '', endHours: '' }
   ]);
+  const [showPassword, setShowPassword] = useState(false);
+  const [loadingAddress, setLoadingAddress] = useState(false);
+  const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
   const navigate = useNavigate();
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const fetchCurrentLocation = async () => {
+    if (navigator.geolocation) {
+      setLoadingAddress(true);
+  
+      navigator.geolocation.getCurrentPosition(async (position) => {
+        const { latitude, longitude } = position.coords;
+        console.log('Fetched Coordinates:', { latitude, longitude });
+  
+        try {
+          const response = await fetch(
+            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${API_KEY}`
+          );
+          const data = await response.json();
+  
+          console.log('Geocoding API Response:', data);
+  
+          if (data.status === 'OK' && data.results.length > 0) {
+            const components = data.results[0].address_components;
+  
+            const street = components.find((c: any) => c.types.includes('route'))?.long_name;
+            const city = components.find((c: any) => c.types.includes('locality'))?.long_name;
+            const postalCode = components.find((c: any) => c.types.includes('postal_code'))?.long_name;
+            const country = components.find((c: any) => c.types.includes('country'))?.long_name;
+  
+            console.log('Address Components:', { street, city, postalCode, country });
+  
+            setValue('address.street', street || '');
+            setValue('address.city', city || '');
+            setValue('address.postalCode', postalCode || '');
+            setValue('address.country', country || '');
+          } else {
+            console.error('Geocoding API error status:', data.status);
+            alert('Unable to retrieve address. Please try again.');
+          }
+        } catch (error) {
+          console.error('Error fetching geolocation:', error);
+          alert('There was an error fetching the location.');
+        } finally {
+          setLoadingAddress(false);
+        }
+      }, (error) => {
+        console.error('Geolocation error:', error);
+        alert('Unable to retrieve your location. Please check your browser settings.');
+        setLoadingAddress(false);
+      });
+    } else {
+      alert('Geolocation is not supported by your browser.');
+    }
+  };
+  
   const onSubmit = async (data: FormValues) => {
     if (role === 'courier' && workingDays.length < 5) {
       alert('Please provide at least 5 working days.');
@@ -66,13 +135,14 @@ const DynamicForm = ({ role }: { role: 'admin' | 'user' | 'courier' }) => {
         state: {
           firstName: data.firstName,
           lastName: data.lastName,
+          pid: data.pid,
           email: data.email,
           phoneNumber: data.phoneNumber,
           role,
           location: data.address,
           profileImage: data.profileImage ? data.profileImage[0] : null,
           vehicle: data.vehicle,
-          workingDays: workingDays,
+          workingDays: data.workingDays,
         },
       });
     } catch (error) {
@@ -148,22 +218,55 @@ const DynamicForm = ({ role }: { role: 'admin' | 'user' | 'courier' }) => {
         <TextField label="PID" {...register('pid', { required: true })} />
         <TextField label="Phone Number" {...register('phoneNumber', { required: true })} />
         <TextField label="Email" type="email" {...register('email', { required: true })} />
-        <TextField label="Password" type="password" {...register('password', { required: true })} />
+        
+        <TextField
+          label="Password"
+          type={showPassword ? 'text' : 'password'}
+          {...register('password', { required: true })}
+          fullWidth
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label="toggle password visibility"
+                  onClick={togglePasswordVisibility}
+                  edge="end"
+                >
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+        />
+
         <Button
-            component="label"
-            role={undefined}
-            variant="contained"
-            tabIndex={-1}
-            startIcon={<CloudUploadIcon />}
-          >
+          component="label"
+          role={undefined}
+          variant="contained"
+          tabIndex={-1}
+          startIcon={<CloudUploadIcon />}
+        >
           Upload Profile Image
           <input type="file" {...register('profileImage', { required: true })} hidden />
         </Button>
 
         {role === 'user' && (
           <>
-            <TextField label="Longitude" {...register('address.lng', { required: true })} />
-            <TextField label="Latitude" {...register('address.lat', { required: true })} />
+            <TextField
+              label="Street"
+              {...register('address.street', { required: true })}
+            />
+            <TextField
+              label="City"
+              {...register('address.city', { required: true })}
+            />
+            <Button
+              variant="outlined"
+              onClick={fetchCurrentLocation}
+              disabled={loadingAddress}
+            >
+              {loadingAddress ? 'Loading...' : 'Use Current Location'}
+            </Button>
           </>
         )}
 
@@ -179,16 +282,21 @@ const DynamicForm = ({ role }: { role: 'admin' | 'user' | 'courier' }) => {
           </>
         )}
 
-        <Button sx={{marginBottom: 2}} startIcon={<LoginIcon/>} type="submit" variant="contained">
+        <Button
+          sx={{marginBottom: 3}}
+          variant="contained"
+          color="primary"
+          type="submit"
+          startIcon={<LoginIcon />}
+        >
           LOG IN
         </Button>
-
+      </Box>
         {role === 'courier' && workingDays.length < 5 && (
           <Typography color="error" variant="body2">
             * At least 5 working days are required.
           </Typography>
         )}
-      </Box>
     </form>
   );
 };
