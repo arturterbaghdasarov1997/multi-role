@@ -293,7 +293,7 @@ const DynamicForm = ({ role }: { role: 'admin' | 'user' | 'courier' }) => {
         </Button>
       </Box>
         {role === 'courier' && workingDays.length < 5 && (
-          <Typography color="error" variant="body2">
+          <Typography sx={{marginBottom: 2}} color="error" variant="body2">
             * At least 5 working days are required.
           </Typography>
         )}
