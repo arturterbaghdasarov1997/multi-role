@@ -73,7 +73,7 @@ const ProfilePage: React.FC = () => {
           Upload Image
           <input type="file" accept="image/*" hidden onChange={handleFileChange} />
         </Button>
-        <Typography variant="h6" sx={{ mt: 2 }}>Name: {`${firstName || ''} ${lastName || ''}`}</Typography>
+        <Typography variant="h3" sx={{ mt: 2 }}>{`${firstName || ''} ${lastName || ''}`}</Typography>
         <Typography variant="body1">PID: {pid || 'Not provided'}</Typography>
         <Typography variant="body1">Phone Number: {phoneNumber || 'Not provided'}</Typography>
         <Typography variant="body1">Email: {email || 'Not provided'}</Typography>
@@ -81,8 +81,8 @@ const ProfilePage: React.FC = () => {
         {role === 'user' && userLocation && (
           <>
             <Typography variant="h6" sx={{ mt: 2 }}>Address:</Typography>
-            <Typography variant="body1">Longitude: {userLocation.lng}</Typography>
-            <Typography variant="body1">Latitude: {userLocation.lat}</Typography>
+            <Typography variant="h6">City: {userLocation.city}</Typography>
+            <Typography variant="h6">Street: {userLocation.street}</Typography>
           </>
         )}
 

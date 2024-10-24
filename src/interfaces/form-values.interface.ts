@@ -8,7 +8,12 @@ export interface WorkingDay {
 export interface Address {
   lat: string;
   lng: string;
+  street?: string;
+  city?: string;
+  postalCode?: string;
+  country?: string;
 }
+
 
 export interface FormValues {
   firstName: string;
