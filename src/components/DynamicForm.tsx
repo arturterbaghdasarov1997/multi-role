@@ -215,7 +215,7 @@ const DynamicForm = ({ role }: { role: 'admin' | 'user' | 'courier' }) => {
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         <TextField label="First Name" {...register('firstName', { required: true })} />
         <TextField label="Last Name" {...register('lastName', { required: true })} />
-        <TextField label="PID" {...register('pid', { required: true })} />
+        <TextField label="Personal ID" {...register('pid', { required: true })} />
         <TextField label="Phone Number" {...register('phoneNumber', { required: true })} />
         <TextField label="Email" type="email" {...register('email', { required: true })} />
         
@@ -293,7 +293,7 @@ const DynamicForm = ({ role }: { role: 'admin' | 'user' | 'courier' }) => {
         </Button>
       </Box>
         {role === 'courier' && workingDays.length < 5 && (
-          <Typography color="error" variant="body2">
+          <Typography sx={{marginBottom: 2}} color="error" variant="body2">
             * At least 5 working days are required.
           </Typography>
         )}

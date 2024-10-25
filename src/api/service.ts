@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API_URL = 'https://crudapi.co.uk/api/v1';
-const API_KEY = import.meta.env.VITE_API_KEY; // Ensure this is set correctly in your .env file
+const API_KEY = import.meta.env.VITE_API_KEY;
 
 // POST request to create a user
 export const createUser = async (userData: object) => {
