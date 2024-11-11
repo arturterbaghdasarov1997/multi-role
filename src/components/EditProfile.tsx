@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import {
   TextField,
@@ -13,26 +13,53 @@ import {
   IconButton
 } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import LoginIcon from '@mui/icons-material/Login';
 import AddIcon from '@mui/icons-material/Add';
+import LoginIcon from '@mui/icons-material/Login';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { createUser, createAdmin, createCourier } from '../api/service';
 import { FormValues, WorkingDay } from '../interfaces/form-values.interface';
+import { useRole } from '../context/Rolecontext';
 
-const DynamicForm = ({ role }: { role: 'admin' | 'user' | 'courier' }) => {
+const EditProfile = () => {
   const { register, handleSubmit, setValue } = useForm<FormValues>();
-  const [workingDays, setWorkingDays] = useState<WorkingDay[]>([
-    { index: 0, day: '', startHours: '', endHours: '' }
-  ]);
+  const [workingDays, setWorkingDays] = useState<WorkingDay[]>([ { index: 0, day: '', startHours: '', endHours: '' } ]);
   const [showPassword, setShowPassword] = useState(false);
   const [loadingAddress, setLoadingAddress] = useState(false);
+  const { role } = useRole();
   const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
   const navigate = useNavigate();
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
+
+  const location = useLocation();
+
+  useEffect(() => {
+    console.log(location.state);
+    if (location.state) {
+      const { firstName, lastName, pid, phoneNumber, email, password, address, vehicle, workingDays } = location.state;
+      setValue('firstName', firstName || '');
+      setValue('lastName', lastName || '');
+      setValue('pid', pid || '');
+      setValue('phoneNumber', phoneNumber || '');
+      setValue('email', email || '');
+      setValue('password', password || '');
+  
+      if (role === 'user' && address) {
+        setValue('address.street', address.street || '');
+        setValue('address.city', address.city || '');
+      }
+  
+      if (role === 'courier') {
+        setValue('vehicle', vehicle || '');
+        if (workingDays) {
+          setWorkingDays(workingDays);
+        }
+      }
+    }
+  }, [location.state, setValue, role]);
 
   const fetchCurrentLocation = async () => {
     if (navigator.geolocation) {
@@ -81,7 +108,7 @@ const DynamicForm = ({ role }: { role: 'admin' | 'user' | 'courier' }) => {
       alert('Geolocation is not supported by your browser.');
     }
   };
-  
+
   const onSubmit = async (data: FormValues) => {
     if (role === 'courier' && workingDays.length < 5) {
       alert('Please provide at least 5 working days.');
@@ -152,7 +179,7 @@ const DynamicForm = ({ role }: { role: 'admin' | 'user' | 'courier' }) => {
   const handleAddWorkingDay = () => {
     if (workingDays.length < 7) {
       setWorkingDays([
-        ...workingDays, 
+        ...workingDays,
         { index: workingDays.length, day: '', startHours: '', endHours: '' }
       ]);
     }
@@ -163,7 +190,10 @@ const DynamicForm = ({ role }: { role: 'admin' | 'user' | 'courier' }) => {
       <Box key={index} sx={{ marginBottom: 2 }}>
         <FormControl fullWidth sx={{ marginBottom: 2 }}>
           <InputLabel>Day</InputLabel>
-          <Select {...register(`workingDays.${index}.day` as const, { required: true })} defaultValue="">
+          <Select
+            {...register(`workingDays.${index}.day` as const, { required: true })}
+            defaultValue=""
+          >
             <MenuItem value="">Select a day</MenuItem>
             <MenuItem value="monday">Monday</MenuItem>
             <MenuItem value="tuesday">Tuesday</MenuItem>
@@ -177,14 +207,20 @@ const DynamicForm = ({ role }: { role: 'admin' | 'user' | 'courier' }) => {
 
         <FormControl fullWidth sx={{ marginBottom: 2 }}>
           <InputLabel>Start Hour</InputLabel>
-          <Select {...register(`workingDays.${index}.startHours` as const, { required: true })} defaultValue="">
+          <Select
+            {...register(`workingDays.${index}.startHours` as const, { required: true })}
+            defaultValue=""
+          >
             {renderHourOptions()}
           </Select>
         </FormControl>
 
         <FormControl fullWidth sx={{ marginBottom: 2 }}>
           <InputLabel>End Hour</InputLabel>
-          <Select {...register(`workingDays.${index}.endHours` as const, { required: true })} defaultValue="">
+          <Select
+            {...register(`workingDays.${index}.endHours` as const, { required: true })}
+            defaultValue=""
+          >
             {renderHourOptions()}
           </Select>
         </FormControl>
@@ -193,23 +229,16 @@ const DynamicForm = ({ role }: { role: 'admin' | 'user' | 'courier' }) => {
   };
 
   const renderHourOptions = () => {
-    const options = [];
+    const hours = [];
     for (let i = 0; i < 24; i++) {
-      for (let j = 0; j < 60; j += 30) {
-        const hours = String(i).padStart(2, '0');
-        const minutes = String(j).padStart(2, '0');
-        options.push(
-          <MenuItem key={`${hours}:${minutes}`} value={`${hours}:${minutes}`}>
-            {`${hours}:${minutes}`}
-          </MenuItem>
-        );
-      }
+      hours.push(<MenuItem key={i} value={`${i}:00`}>{`${i}:00`}</MenuItem>);
     }
-    return options;
+    return hours;
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
+      <Typography variant='h3'>Edit Profile</Typography>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         <TextField label="First Name" {...register('firstName', { required: true })} />
         <TextField label="Last Name" {...register('lastName', { required: true })} />
@@ -220,7 +249,8 @@ const DynamicForm = ({ role }: { role: 'admin' | 'user' | 'courier' }) => {
         <TextField
           label="Password"
           type={showPassword ? 'text' : 'password'}
-          {...register('password', { required: true })}
+          {...register('password')}
+          placeholder="Leave blank to keep current password"
           fullWidth
           InputProps={{
             endAdornment: (
@@ -287,7 +317,7 @@ const DynamicForm = ({ role }: { role: 'admin' | 'user' | 'courier' }) => {
           type="submit"
           startIcon={<LoginIcon />}
         >
-          LOG IN
+          Save Changes
         </Button>
       </Box>
         {role === 'courier' && workingDays.length < 5 && (
@@ -299,4 +329,4 @@ const DynamicForm = ({ role }: { role: 'admin' | 'user' | 'courier' }) => {
   );
 };
 
-export default DynamicForm;
+export default EditProfile;

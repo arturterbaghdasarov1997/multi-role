@@ -10,8 +10,6 @@ export interface Address {
   lng: string;
   street?: string;
   city?: string;
-  postalCode?: string;
-  country?: string;
 }
 
 
