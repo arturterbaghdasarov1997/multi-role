@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Box, Typography, Avatar, Button } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import Navbar from '../components/NavBar';
 import { WorkingDay } from '../interfaces/form-values.interface';
+import { BorderColor, DeleteForever } from '@mui/icons-material';
 
 const ProfilePage: React.FC = () => {
   const location = useLocation();
-  
+  const navigate = useNavigate();
+
   console.log("ProfilePage location.state:", location.state);
 
   const {
@@ -43,6 +45,17 @@ const ProfilePage: React.FC = () => {
         localStorage.setItem('profileImage', reader.result as string);
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const handleEditProfile = () => {
+    navigate(`/edit-profile`, { state: location.state });
+  };
+
+  const handleDeleteProfile = () => {
+    if (window.confirm('Are you sure you want to delete your profile?')) {
+      console.log('Profile deleted');
+      navigate('/');
     }
   };
 
@@ -102,6 +115,26 @@ const ProfilePage: React.FC = () => {
                 <Typography variant="body1">No working days available.</Typography>
             )}
           </>
+        )}
+        <Button
+          variant="outlined"
+          color="primary"
+          sx={{ mt: 4 }}
+          onClick={handleEditProfile}
+          startIcon={<BorderColor/>}
+        >
+          Edit Profile
+        </Button>
+        {role !== 'courier' && (
+          <Button
+            variant="outlined"
+            color="error"
+            sx={{ mt: 2 }}
+            onClick={handleDeleteProfile}
+            startIcon={<DeleteForever />}
+          >
+            Delete Profile
+          </Button>
         )}
       </Box>
     </Box>
