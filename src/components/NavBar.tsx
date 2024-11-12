@@ -15,25 +15,17 @@ const Navbar: React.FC<NavbarProps> = ({ role }) => {
     navigate('/');
   };
 
-  const getDashboardTitle = () => {
-    switch (role) {
-      case 'admin':
-        return 'ADMIN DASHBOARD';
-      case 'user':
-        return 'USER DASHBOARD';
-      case 'courier':
-        return 'COURIER DASHBOARD';
-      default:
-        return '';
-    }
-  };
-
   return (
-    <AppBar position="static" sx={{ margin: 0, padding: 0 }}>
-      <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', padding: 0 }}>
-        <Typography variant="h6" sx={{ marginLeft: 2 }}>
-          {getDashboardTitle()}
+    <AppBar position="static">
+      <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
+        <Typography variant="h6">
+          {role === 'admin' ? 'ADMIN DASHBOARD' : role === 'courier' ? 'COURIER DASHBOARD' : 'USER DASHBOARD'}
         </Typography>
+        {role === 'admin' && (
+          <>
+            <Button color="inherit" onClick={() => navigate('/user-management')}>User Management</Button>
+          </>
+        )}
         <Button startIcon={<LogoutIcon />} color="inherit" onClick={handleLogout}>
           LOG OUT
         </Button>
