@@ -168,3 +168,22 @@ export const deleteUserData = async (id: string, role: string) => {
     throw error;
   }
 };
+
+// Fetch users and couriers
+export const fetchUsers = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/users`, {
+      headers: {
+        Authorization: `Bearer ${API_KEY}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error('Error fetching users:', error.response?.data || error.message);
+    } else {
+      console.error('Unknown error:', error);
+    }
+    throw error;
+  }
+};
