@@ -224,20 +224,3 @@ export const deleteCourier = async (id: string) => {
     throw error;
   }
 };
-
-export const assignTaskToCourier = async (courierId: string, taskDescription: string) => {
-  try {
-    const response = await fetch(`/api/couriers/${courierId}/tasks`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ description: taskDescription }),
-    });
-    if (!response.ok) throw new Error('Failed to assign task');
-    return response.json();
-  } catch (error) {
-    console.error('Error assigning task:', error);
-    throw error;
-  }
-};
