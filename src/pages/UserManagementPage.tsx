@@ -7,7 +7,7 @@ interface User {
   firstName: string;
   lastName: string;
   phoneNumber: string;
-  role: 'user' | 'courier';
+  userRole: 'user' | 'courier' | 'admin';
 }
 
 const UserManagementPage: React.FC = () => {
@@ -30,12 +30,12 @@ const UserManagementPage: React.FC = () => {
         setLoading(false);
       }
     };
-  
+
     loadUsers();
   }, []);
 
+  const userRole = localStorage.getItem('userRole');
   const totalPages = Math.ceil(users.length / itemsPerPage);
-
   const currentUsers = users.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
@@ -47,37 +47,32 @@ const UserManagementPage: React.FC = () => {
 
   return (
     <Box sx={{ padding: 3 }}>
-      <Typography variant="h4" sx={{ marginBottom: 3 }}>
-        User and Courier Management
+      <Typography variant="h4" gutterBottom>
+        User Management
       </Typography>
       {loading ? (
         <Typography>Loading...</Typography>
       ) : error ? (
         <Typography color="error">{error}</Typography>
-      ) : users.length === 0 ? (
-        <Typography>No users or couriers found.</Typography>
       ) : (
-        <>
-          <Paper sx={{ padding: 2, marginBottom: 2 }}>
-            <List>
-              {currentUsers.map((user) => (
-                <ListItem key={user.id} divider>
-                  <ListItemText
-                    primary={`${user.firstName} ${user.lastName}`}
-                    secondary={`Phone: ${user.phoneNumber} | Role: ${user.role}`}
-                  />
-                </ListItem>
-              ))}
-            </List>
-          </Paper>
+        <Paper>
+          <List>
+            {currentUsers.map(user => (
+              <ListItem key={user.id}>
+                <ListItemText
+                  primary={`${user.firstName} ${user.lastName}`}
+                  secondary={`Role: ${userRole}, Phone: ${user.phoneNumber}`}
+                />
+              </ListItem>
+            ))}
+          </List>
           <Pagination
             count={totalPages}
             page={currentPage}
             onChange={handlePageChange}
-            color="primary"
-            sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}
+            sx={{ display: 'flex', justifyContent: 'center', marginTop: 2 }}
           />
-        </>
+        </Paper>
       )}
     </Box>
   );
