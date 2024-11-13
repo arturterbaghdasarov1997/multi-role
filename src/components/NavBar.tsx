@@ -24,6 +24,7 @@ const Navbar: React.FC<NavbarProps> = ({ role }) => {
         {role === 'admin' && (
           <>
             <Button color="inherit" onClick={() => navigate('/user-management')}>User Management</Button>
+            <Button color="inherit" onClick={() => navigate('/courier-management')}>Courier Management</Button>
           </>
         )}
         <Button startIcon={<LogoutIcon />} color="inherit" onClick={handleLogout}>

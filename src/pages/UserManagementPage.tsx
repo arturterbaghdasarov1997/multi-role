@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, Paper, List, ListItem, ListItemText, Pagination } from '@mui/material';
+import { Box, Typography, Paper, List, ListItem, ListItemText, Pagination, TextField } from '@mui/material';
 import { fetchUsers } from '../api/service';
 
 interface User {
@@ -7,11 +7,13 @@ interface User {
   firstName: string;
   lastName: string;
   phoneNumber: string;
-  userRole: 'user' | 'courier' | 'admin';
+  email: string;
 }
 
 const UserManagementPage: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -23,6 +25,7 @@ const UserManagementPage: React.FC = () => {
         const data = await fetchUsers();
         console.log('Fetched users:', data.items);
         setUsers(data.items || []);
+        setFilteredUsers(data.items || []);
       } catch (error) {
         setError('Failed to fetch users');
         console.error('Error fetching users:', error);
@@ -34,8 +37,25 @@ const UserManagementPage: React.FC = () => {
     loadUsers();
   }, []);
 
-  const totalPages = Math.ceil(users.length / itemsPerPage);
-  const currentUsers = users.slice(
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const query = event.target.value;
+    setSearchQuery(query);
+
+    if (query === '') {
+      setFilteredUsers(users);
+    } else {
+      const filtered = users.filter(user =>
+        `${user.firstName} ${user.lastName}`.toLowerCase().includes(query.toLowerCase()) ||
+        user.phoneNumber.includes(query) ||
+        user.email.toLowerCase().includes(query.toLowerCase())
+      );
+      setFilteredUsers(filtered);
+    }
+    setCurrentPage(1);
+  };
+
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+  const currentUsers = filteredUsers.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -49,6 +69,14 @@ const UserManagementPage: React.FC = () => {
       <Typography variant="h4" gutterBottom>
         User Management
       </Typography>
+      <TextField
+        label="Search"
+        variant="outlined"
+        fullWidth
+        value={searchQuery}
+        onChange={handleSearchChange}
+        sx={{ marginBottom: 2 }}
+      />
       {loading ? (
         <Typography>Loading...</Typography>
       ) : error ? (
@@ -60,7 +88,7 @@ const UserManagementPage: React.FC = () => {
               <ListItem key={user.id}>
                 <ListItemText
                   primary={`${user.firstName} ${user.lastName}`}
-                  secondary={`Role: ${user.userRole}, Phone: ${user.phoneNumber}`}
+                  secondary={`Phone: ${user.phoneNumber}, E-mail: ${user.email}`}
                 />
               </ListItem>
             ))}
