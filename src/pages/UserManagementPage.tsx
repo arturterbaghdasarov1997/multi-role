@@ -34,7 +34,6 @@ const UserManagementPage: React.FC = () => {
     loadUsers();
   }, []);
 
-  const userRole = localStorage.getItem('userRole');
   const totalPages = Math.ceil(users.length / itemsPerPage);
   const currentUsers = users.slice(
     (currentPage - 1) * itemsPerPage,
@@ -61,7 +60,7 @@ const UserManagementPage: React.FC = () => {
               <ListItem key={user.id}>
                 <ListItemText
                   primary={`${user.firstName} ${user.lastName}`}
-                  secondary={`Role: ${userRole}, Phone: ${user.phoneNumber}`}
+                  secondary={`Role: ${user.userRole}, Phone: ${user.phoneNumber}`}
                 />
               </ListItem>
             ))}
