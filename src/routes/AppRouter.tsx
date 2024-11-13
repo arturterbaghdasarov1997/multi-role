@@ -8,6 +8,7 @@ import EditProfile from '../components/EditProfile';
 import UserManagementPage from '../pages/UserManagementPage';
 import ProtectedRoute from './ProtectedRoute';
 import { RoleProvider } from '../context/Rolecontext';
+import CourierManagementPage from '../pages/CourierManagementPage';
 
 const AppRouter: React.FC = () => {
 
@@ -23,6 +24,14 @@ const AppRouter: React.FC = () => {
             element={
               <ProtectedRoute role={"admin"} requiredRole="admin">
                 <UserManagementPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/courier-management"
+            element={
+              <ProtectedRoute role={"admin"} requiredRole="admin">
+                <CourierManagementPage />
               </ProtectedRoute>
             }
           />

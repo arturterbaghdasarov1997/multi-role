@@ -187,3 +187,57 @@ export const fetchUsers = async () => {
     throw error;
   }
 };
+
+export const fetchCouriers = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/couriers`, {
+      headers: {
+        Authorization: `Bearer ${API_KEY}`,
+      },
+    });
+    
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error('Error fetching couriers:', error.response?.data || error.message);
+    } else {
+      console.error('Unknown error:', error);
+    }
+    throw error;
+  }
+};
+
+export const deleteCourier = async (id: string) => {
+  try {
+    const response = await axios.delete(`${API_URL}/couriers/${id}`, {
+      headers: {
+        Authorization: `Bearer ${API_KEY}`,
+      },
+    });
+    console.log('Courier deleted successfully:', response.data);
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error('Error deleting courier:', error.response?.data || error.message);
+    } else {
+      console.error('Unknown error:', error);
+    }
+    throw error;
+  }
+};
+
+export const assignTaskToCourier = async (courierId: string, taskDescription: string) => {
+  try {
+    const response = await fetch(`/api/couriers/${courierId}/tasks`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ description: taskDescription }),
+    });
+    if (!response.ok) throw new Error('Failed to assign task');
+    return response.json();
+  } catch (error) {
+    console.error('Error assigning task:', error);
+    throw error;
+  }
+};

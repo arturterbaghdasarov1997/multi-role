@@ -26,7 +26,7 @@ const EditProfile = () => {
   const [workingDays, setWorkingDays] = useState<WorkingDay[]>([ { index: 0, day: '', startHours: '', endHours: '' } ]);
   const [showPassword, setShowPassword] = useState(false);
   const [loadingAddress, setLoadingAddress] = useState(false);
-  const { role } = useRole();
+  const { role, setRole } = useRole();
   const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
   const navigate = useNavigate();
 
@@ -37,6 +37,8 @@ const EditProfile = () => {
   const location = useLocation();
 
   useEffect(() => {
+    setRole('admin');
+    
     console.log(location.state);
     if (location.state) {
       const { firstName, lastName, pid, phoneNumber, email, password, address, vehicle, workingDays } = location.state;
@@ -59,7 +61,7 @@ const EditProfile = () => {
         }
       }
     }
-  }, [location.state, setValue, role]);
+  }, [location.state, setValue, role, setRole]);
 
   const fetchCurrentLocation = async () => {
     if (navigator.geolocation) {
@@ -178,10 +180,7 @@ const EditProfile = () => {
 
   const handleAddWorkingDay = () => {
     if (workingDays.length < 7) {
-      setWorkingDays([
-        ...workingDays,
-        { index: workingDays.length, day: '', startHours: '', endHours: '' }
-      ]);
+      setWorkingDays([ ...workingDays, { index: workingDays.length, day: '', startHours: '', endHours: '' } ]);
     }
   };
 
