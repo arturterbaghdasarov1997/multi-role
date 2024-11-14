@@ -26,7 +26,7 @@ const EditProfile = () => {
   const [workingDays, setWorkingDays] = useState<WorkingDay[]>([ { index: 0, day: '', startHours: '', endHours: '' } ]);
   const [showPassword, setShowPassword] = useState(false);
   const [loadingAddress, setLoadingAddress] = useState(false);
-  const { role, setRole } = useRole();
+  const { role } = useRole();
   const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
   const navigate = useNavigate();
 
@@ -37,8 +37,6 @@ const EditProfile = () => {
   const location = useLocation();
 
   useEffect(() => {
-    setRole('admin');
-    
     console.log(location.state);
     if (location.state) {
       const { firstName, lastName, pid, phoneNumber, email, password, address, vehicle, workingDays } = location.state;
@@ -61,7 +59,7 @@ const EditProfile = () => {
         }
       }
     }
-  }, [location.state, setValue, role, setRole]);
+  }, [location.state, setValue, role]);
 
   const fetchCurrentLocation = async () => {
     if (navigator.geolocation) {
@@ -116,9 +114,10 @@ const EditProfile = () => {
       alert('Please provide at least 5 working days.');
       return;
     }
-
+  
     try {
-      const userData = {
+      // Base user data common across roles
+      const baseData = {
         firstName: data.firstName,
         lastName: data.lastName,
         pid: data.pid,
@@ -126,13 +125,34 @@ const EditProfile = () => {
         email: data.email,
         password: data.password,
         profileImage: data.profileImage?.[0],
-        ...(role === 'user' && { address: data.address }),
-        ...(role === 'courier' && {
-          vehicle: data.vehicle,
-          workingDays: workingDays,
-        }),
       };
-
+  
+      // Handle user-specific data
+      const userData = role === 'user' ? {
+        ...baseData,
+        address: data.address,
+      } : {};
+  
+      // Handle courier-specific data
+      const courierData = role === 'courier' ? {
+        ...baseData,
+        vehicle: data.vehicle,
+        workingDays: workingDays,
+      } : {};
+  
+      // Handle admin-specific data
+      const adminData = role === 'admin' ? {
+        ...baseData,
+      } : {};
+  
+      // Combine the relevant data based on the role
+      const submitData = {
+        ...userData,
+        ...courierData,
+        ...adminData,
+      };
+  
+      // Handle image file if available
       if (data.profileImage?.[0]) {
         const reader = new FileReader();
         reader.onload = () => {
@@ -142,34 +162,26 @@ const EditProfile = () => {
         };
         reader.readAsDataURL(data.profileImage[0]);
       }
-
+  
       let response;
       switch (role) {
         case 'admin':
-          response = await createAdmin(userData);
+          response = await createAdmin(submitData);
           break;
         case 'courier':
-          response = await createCourier(userData);
+          response = await createCourier(submitData);
           break;
         default:
-          response = await createUser(userData);
+          response = await createUser(submitData);
           break;
       }
-
+  
       console.log('API Response:', response);
-
+  
       navigate('/profile', {
         state: {
-          firstName: data.firstName,
-          lastName: data.lastName,
-          pid: data.pid,
-          email: data.email,
-          phoneNumber: data.phoneNumber,
-          role,
-          location: data.address,
+          ...submitData,
           profileImage: data.profileImage ? data.profileImage[0] : null,
-          vehicle: data.vehicle,
-          workingDays: data.workingDays,
         },
       });
     } catch (error) {
@@ -180,7 +192,10 @@ const EditProfile = () => {
 
   const handleAddWorkingDay = () => {
     if (workingDays.length < 7) {
-      setWorkingDays([ ...workingDays, { index: workingDays.length, day: '', startHours: '', endHours: '' } ]);
+      setWorkingDays([
+        ...workingDays,
+        { index: workingDays.length, day: '', startHours: '', endHours: '' }
+      ]);
     }
   };
 

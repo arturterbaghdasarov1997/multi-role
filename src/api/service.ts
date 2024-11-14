@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { Task } from '../pages/CourierTasksPage';
 
 const API_URL = 'https://crudapi.co.uk/api/v1';
 const API_KEY = import.meta.env.VITE_API_KEY;
@@ -217,5 +218,45 @@ export const deleteCourier = async (id: string): Promise<void> => {
   } catch (error) {
     console.error('Error deleting courier:', error);
     throw error;
+  }
+};
+
+// Create Tasks
+export const createTask = async (taskData: object) => {
+  try {
+    const response = await axios.post(`${API_URL}/tasks`, [taskData], {
+      headers: {
+        Authorization: `Bearer ${API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    return response.data;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      console.error('Error response:', error.response?.data || error.message);
+    } else if (error instanceof Error) {
+      console.error('Error message:', error.message);
+    } else {
+      console.error('Unknown error', error);
+    }
+    throw error;
+  }
+};
+
+export const fetchTasks = async (): Promise<Task[]> => {
+  try {
+    const response = await axios.get(`${API_URL}/tasks`, {
+      headers: {
+        Authorization: `Bearer ${API_KEY}`,
+      },
+    });
+
+    const validTasks = response.data.items.filter((task: Task) =>
+      task.name && task.description && task.time && task.priority
+    );
+
+    return validTasks;
+  } catch (error) {
+    throw new Error('Error fetching tasks');
   }
 };

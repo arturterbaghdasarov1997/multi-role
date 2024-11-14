@@ -75,7 +75,12 @@ const ProfilePage: React.FC = () => {
         
         {role === 'admin' && <AdminComponent {...{ firstName, lastName, pid, phoneNumber, email }} />}
         {role === 'user' && <UserComponent {...{ firstName, lastName, pid, phoneNumber, email, userLocation }} />}
-        {role === 'courier' && <CourierComponent {...{ firstName, lastName, pid, phoneNumber, email, vehicle, workingDays }} />}
+        {role === 'courier' && (
+          <CourierComponent
+            {...{ firstName, lastName, pid, phoneNumber, email, vehicle, workingDays }}
+            courierId={location.state?.courierId || 'default_courier_id'}
+          />
+        )}
 
         <Button variant="outlined" color="primary" sx={{ mt: 4 }} onClick={handleEditProfile} startIcon={<BorderColor />}>
           Edit Profile

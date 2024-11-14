@@ -12,7 +12,6 @@ export interface Address {
   city?: string;
 }
 
-
 export interface FormValues {
   firstName: string;
   lastName: string;

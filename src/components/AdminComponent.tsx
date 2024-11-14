@@ -1,7 +1,7 @@
 import React from 'react';
 import { Typography } from '@mui/material';
 
-interface AdminComponentProps {
+export interface AdminComponentProps {
   firstName: string;
   lastName: string;
   pid: string;
