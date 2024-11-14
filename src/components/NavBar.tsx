@@ -10,7 +10,7 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ role }) => {
   const navigate = useNavigate();
-  const location = useLocation(); // Get current route location
+  const location = useLocation();
 
   const handleLogout = () => {
     localStorage.removeItem('profileImage');
@@ -18,7 +18,7 @@ const Navbar: React.FC<NavbarProps> = ({ role }) => {
   };
 
   const handleBack = () => {
-    navigate(-1); // Go back to the previous page
+    navigate(-1);
   };
 
   const isOnManagementPage = location.pathname === '/user-management' || location.pathname === '/courier-management';
@@ -26,14 +26,12 @@ const Navbar: React.FC<NavbarProps> = ({ role }) => {
   return (
     <AppBar position="static">
       <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
-        {/* Show Back Button only on User Management and Courier Management */}
         {isOnManagementPage && (
           <Button startIcon={<ArrowBackIcon />} color="inherit" onClick={handleBack}>
             Back
           </Button>
         )}
 
-        {/* Show the title only on dashboard pages */}
         <Typography variant="h6">
           {location.pathname === '/user-management' ? (
             'Manage Users'
@@ -48,7 +46,6 @@ const Navbar: React.FC<NavbarProps> = ({ role }) => {
           )}
         </Typography>
 
-        {/* Role-based specific buttons */}
         {role === 'admin' && !isOnManagementPage && (
           <>
             <Button color="inherit" onClick={() => navigate('/user-management')}>User Management</Button>
@@ -56,7 +53,11 @@ const Navbar: React.FC<NavbarProps> = ({ role }) => {
           </>
         )}
 
-        {/* Log out button */}
+        {role === 'courier' && !isOnManagementPage && (
+          <>
+            <Button color="inherit" onClick={() => navigate('/courier-tasks')}>Tasks</Button>
+          </>
+        )}
         <Button startIcon={<LogoutIcon />} color="inherit" onClick={handleLogout}>
           LOG OUT
         </Button>

@@ -3,7 +3,7 @@ import { Box, Typography, Paper, List, ListItem, ListItemText, Pagination, Butto
 import { v4 as uuidv4 } from 'uuid';
 import { fetchCouriers, deleteCourier } from '../api/service';
 import Navbar from '../components/NavBar';
-import { useRole } from '../context/Rolecontext';
+import { useNavigate } from 'react-router-dom';
 
 interface Courier {
   _uuid: string;
@@ -21,6 +21,7 @@ const CourierManagementPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  const navigate = useNavigate();
 
   useEffect(() => {
     const loadCouriers = async () => {
@@ -84,6 +85,10 @@ const CourierManagementPage: React.FC = () => {
     }
   };
 
+  const handleAssignTask = (courierId: string) => {
+    navigate('/assign-task');
+  };
+
   return (
     <Box>
       <Box sx={{ marginBottom: '10px' }}>
@@ -116,14 +121,22 @@ const CourierManagementPage: React.FC = () => {
                       secondary={`Phone: ${courier.phoneNumber}, E-mail: ${courier.email}`}
                     />
                     <Button
-                      variant="outlined"
-                      color="error"
-                      onClick={() => {
-                        console.log(`Attempting to delete courier with ID: ${courier._uuid}`);
-                        handleDeleteCourier(courier._uuid); // Use courier.id here
-                      }}
-                    >
-                      Delete
+                        variant="outlined"
+                        color="primary"
+                        onClick={() => handleAssignTask(courier._uuid)}
+                        sx={{ mr: 2 }}
+                        >
+                        Assign Task
+                    </Button>
+                    <Button
+                        variant="outlined"
+                        color="error"
+                        onClick={() => {
+                            console.log(`Attempting to delete courier with ID: ${courier._uuid}`);
+                            handleDeleteCourier(courier._uuid);
+                        }}
+                        >
+                        Delete
                     </Button>
                   </ListItem>
                 ))
