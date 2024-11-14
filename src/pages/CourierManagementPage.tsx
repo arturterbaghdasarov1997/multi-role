@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Typography, Paper, List, ListItem, ListItemText, Pagination, Button, TextField } from '@mui/material';
+import { v4 as uuidv4 } from 'uuid';
 import { fetchCouriers, deleteCourier } from '../api/service';
+import Navbar from '../components/NavBar';
+import { useRole } from '../context/Rolecontext';
 
 interface Courier {
-  id: string;
+  _uuid: string;
   firstName: string;
   lastName: string;
   phoneNumber: string;
@@ -13,7 +16,7 @@ interface Courier {
 const CourierManagementPage: React.FC = () => {
   const [couriers, setCouriers] = useState<Courier[]>([]);
   const [filteredCouriers, setFilteredCouriers] = useState<Courier[]>([]);
-  const [searchQuery, setSearchQuery] = useState<string>(''); // State for search query
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -24,8 +27,14 @@ const CourierManagementPage: React.FC = () => {
       try {
         const data = await fetchCouriers();
         console.log('Fetched couriers:', data.items);
-        setCouriers(data.items || []);
-        setFilteredCouriers(data.items || []);  // Initially set filtered couriers to all couriers
+
+        const couriersWithIds = (data.items || []).map((courier: Courier) => ({
+          ...courier,
+          id: courier._uuid || uuidv4(),
+        }));
+
+        setCouriers(couriersWithIds);
+        setFilteredCouriers(couriersWithIds);
       } catch (error) {
         setError('Failed to fetch couriers');
         console.error('Error fetching couriers:', error);
@@ -65,15 +74,10 @@ const CourierManagementPage: React.FC = () => {
   };
 
   const handleDeleteCourier = async (courierId: string) => {
-    if (!courierId) {
-      console.error('Courier ID is missing!');
-      return;
-    }
-
     try {
       await deleteCourier(courierId);
-      setCouriers(couriers.filter(courier => courier.id !== courierId));
-      setFilteredCouriers(filteredCouriers.filter(courier => courier.id !== courierId));
+      setCouriers(couriers.filter((courier) => courier._uuid !== courierId));
+      setFilteredCouriers(filteredCouriers.filter((courier) => courier._uuid !== courierId));
     } catch (error) {
       console.error('Error deleting courier:', error);
       setError('Failed to delete courier');
@@ -81,7 +85,10 @@ const CourierManagementPage: React.FC = () => {
   };
 
   return (
-    <Box sx={{ padding: 3 }}>
+    <Box>
+      <Box sx={{ marginBottom: '10px' }}>
+        <Navbar role={'admin'} />
+      </Box>
       <Typography variant="h4" gutterBottom>
         Courier Management
       </Typography>
@@ -103,7 +110,7 @@ const CourierManagementPage: React.FC = () => {
             <List>
               {currentCouriers.length > 0 ? (
                 currentCouriers.map((courier) => (
-                  <ListItem key={courier.id}>
+                  <ListItem key={courier._uuid}>
                     <ListItemText
                       primary={`${courier.firstName} ${courier.lastName}`}
                       secondary={`Phone: ${courier.phoneNumber}, E-mail: ${courier.email}`}
@@ -111,7 +118,10 @@ const CourierManagementPage: React.FC = () => {
                     <Button
                       variant="outlined"
                       color="error"
-                      onClick={() => handleDeleteCourier(courier.id)}
+                      onClick={() => {
+                        console.log(`Attempting to delete courier with ID: ${courier._uuid}`);
+                        handleDeleteCourier(courier._uuid); // Use courier.id here
+                      }}
                     >
                       Delete
                     </Button>
