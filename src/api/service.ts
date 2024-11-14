@@ -89,7 +89,7 @@ export const getUserData = async () => {
 export const updateUser = async (id: string, userData: object) => {
   try {
     const response = await axios.put(
-      `${API_URL}/users/${id}`, // Correct URL structure with `id`
+      `${API_URL}/users/${id}`,
       userData,
       {
         headers: {
@@ -109,7 +109,7 @@ export const updateUser = async (id: string, userData: object) => {
 export const updateAdmin = async (id: string, adminData: object) => {
   try {
     const response = await axios.put(
-      `${API_URL}/admins/${id}`, // Correct URL structure with `id`
+      `${API_URL}/admins/${id}`,
       adminData,
       {
         headers: {
@@ -129,7 +129,7 @@ export const updateAdmin = async (id: string, adminData: object) => {
 export const updateCourier = async (id: string, courierData: object) => {
   try {
     const response = await axios.put(
-      `${API_URL}/couriers/${id}`, // Correct URL structure with `id`
+      `${API_URL}/couriers/${id}`,
       courierData,
       {
         headers: {
@@ -207,20 +207,15 @@ export const fetchCouriers = async () => {
   }
 };
 
-export const deleteCourier = async (id: string) => {
+export const deleteCourier = async (id: string): Promise<void> => {
   try {
-    const response = await axios.delete(`${API_URL}/couriers/${id}`, {
+    await axios.delete(`${API_URL}/couriers/${id}`, {
       headers: {
         Authorization: `Bearer ${API_KEY}`,
       },
     });
-    console.log('Courier deleted successfully:', response.data);
   } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.error('Error deleting courier:', error.response?.data || error.message);
-    } else {
-      console.error('Unknown error:', error);
-    }
+    console.error('Error deleting courier:', error);
     throw error;
   }
 };

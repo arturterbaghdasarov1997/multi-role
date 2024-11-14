@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Typography, Paper, List, ListItem, ListItemText, Pagination, TextField } from '@mui/material';
 import { fetchUsers } from '../api/service';
+import Navbar from '../components/NavBar';
 
 interface User {
   id: string;
@@ -65,7 +66,10 @@ const UserManagementPage: React.FC = () => {
   };
 
   return (
-    <Box sx={{ padding: 3 }}>
+    <Box>
+      <Box sx={{ marginBottom: '10px' }}>
+        <Navbar role={'admin'} />
+      </Box>
       <Typography variant="h4" gutterBottom>
         User Management
       </Typography>
